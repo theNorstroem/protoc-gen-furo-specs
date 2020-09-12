@@ -1,15 +1,9 @@
 # protoc-gen-furo-specs
-protoc-gen-furo-specs is a protoc plugin to create a patch method for your pb.go messages. 
-The method applys a delta for every field to an existing target of the same
-type according to the update_mask. 
 
-It generates the method if your message type have a field **update_mask**.
 
 ## Use Case
-- Client sends a PATCH with update_mask (*google.protobuf.types.known.FieldMask*)
-- The Server loads the full data and applies the changes with original.PatchWithUpdateMask(deltapb)
-  
- 
+
+
 ## Parameters
 #### [exclude] 
 Optional regex to match target files that should not be built.
@@ -41,10 +35,7 @@ import (
 ## Using the plugin
 Like every other protoc generator... Nothing special here.
 ```
-protoc -I. \
--I/usr/local/include \
--I$GOPATH/src  \
--I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis  \
---go-patch_out=output:. **/*.proto
+go build . && protoc --plugin protoc-gen-furo-specs -I../furoBaseSpecs/dist/proto/Messages/ -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I$GOPATH/src/github.com/googleapis/googleapis --furo-specs_out=:./out ../furoBaseSpecs/dist/proto/Messages/**/*.proto
+
 ```
 
