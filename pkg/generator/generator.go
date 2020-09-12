@@ -64,8 +64,11 @@ func getFields(fieldinfo protoast.MessageInfo) *orderedmap.OrderedMap {
 		if f.Info.LeadingComments != nil {
 			fielddescription = *f.Info.LeadingComments
 		}
+
+		// repeated is in f.Field.Label
+
 		field := specSpec.Field{
-			Type:        f.Field.Type.String(),
+			Type:        *f.Field.TypeName,
 			Description: fielddescription,
 			XProto: &specSpec.Fieldproto{
 				Number: *f.Field.Number,
