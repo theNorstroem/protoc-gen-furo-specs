@@ -1,6 +1,7 @@
 package protoast
 
 import (
+	options "google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
@@ -17,10 +18,11 @@ type ServiceInfo struct {
 }
 
 type MethodInfo struct {
-	Name    string
-	Info    *descriptorpb.SourceCodeInfo_Location
-	Method  *descriptorpb.MethodDescriptorProto
-	Service *descriptorpb.ServiceDescriptorProto // link the parent service
+	Name       string
+	Info       *descriptorpb.SourceCodeInfo_Location
+	Method     *descriptorpb.MethodDescriptorProto
+	Service    *descriptorpb.ServiceDescriptorProto // link the parent service
+	ApiOptions *options.HttpRule
 }
 
 type MessageInfo struct {
@@ -52,24 +54,30 @@ func GetSourceInfo(descr *descriptorpb.FileDescriptorProto) SourceInfo {
 				Methods: []MethodInfo{},
 			})
 		}
+		// Methods
 		// 6 111 2 222 4 9999 =>	 4 ServiceIndex 2 Method 4 Option
 		// for field with index 222 in Service with index 111
 		// location info for descriptor.ServiceType[111]Field[222]
 		if len(location.GetPath()) == 4 && location.Path[0] == 6 && location.Path[2] == 2 {
-			msgIndex := location.Path[1]
-			fieldIndex := location.Path[3]
+			sIndex := location.Path[1]
+			methodIndex := location.Path[3]
+			apiOptions, _ := ExtractAPIOptions(descr.Service[sIndex].Method[methodIndex])
 			fi := MethodInfo{
-				Name:    *descr.Service[msgIndex].Method[fieldIndex].Name,
-				Info:    location,
-				Method:  descr.Service[msgIndex].Method[fieldIndex],
-				Service: descr.Service[msgIndex],
+				Name:       *descr.Service[sIndex].Method[methodIndex].Name,
+				Info:       location,
+				Method:     descr.Service[sIndex].Method[methodIndex],
+				Service:    descr.Service[sIndex],
+				ApiOptions: apiOptions,
 			}
-			SourceInfo.Services[msgIndex].Methods = append(SourceInfo.Services[msgIndex].Methods, fi)
+			SourceInfo.Services[sIndex].Methods = append(SourceInfo.Services[sIndex].Methods, fi)
 		}
 
+		// Method options
 		if len(location.GetPath()) == 6 && location.Path[0] == 6 && location.Path[2] == 2 && location.Path[4] == 4 {
 			//sIndex := location.Path[1]
 			//mIndex := location.Path[3]
+			a := 2
+			a = a
 		}
 
 		// 4 111 2 222 => 4 MessageIndex 2 FieldIndex

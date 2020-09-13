@@ -1,12 +1,9 @@
 # github.com/Masterminds/goutils v1.1.0
 ## explicit
-github.com/Masterminds/goutils
 # github.com/Masterminds/semver v1.5.0
 ## explicit
-github.com/Masterminds/semver
 # github.com/Masterminds/sprig v2.22.0+incompatible
 ## explicit
-github.com/Masterminds/sprig
 # github.com/gogo/protobuf v1.3.1
 ## explicit
 # github.com/golang/protobuf v1.4.2
@@ -16,21 +13,15 @@ github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/ptypes/any
 # github.com/google/uuid v1.1.2
 ## explicit
-github.com/google/uuid
 # github.com/huandu/xstrings v1.3.2
 ## explicit
-github.com/huandu/xstrings
 # github.com/iancoleman/strcase v0.1.1
 ## explicit
 github.com/iancoleman/strcase
 # github.com/imdario/mergo v0.3.11
 ## explicit
-github.com/imdario/mergo
 # github.com/mitchellh/copystructure v1.0.0
 ## explicit
-github.com/mitchellh/copystructure
-# github.com/mitchellh/reflectwalk v1.0.0
-github.com/mitchellh/reflectwalk
 # github.com/theNorstroem/spectools v1.3.0
 ## explicit
 github.com/theNorstroem/spectools/pkg/orderedmap
@@ -38,8 +29,9 @@ github.com/theNorstroem/spectools/pkg/specSpec
 github.com/theNorstroem/spectools/pkg/specSpec/furo
 # golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 ## explicit
-golang.org/x/crypto/pbkdf2
-golang.org/x/crypto/scrypt
+# google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
+## explicit
+google.golang.org/genproto/googleapis/api/annotations
 # google.golang.org/protobuf v1.25.0
 ## explicit
 google.golang.org/protobuf/encoding/prototext
@@ -74,4 +66,5 @@ google.golang.org/protobuf/types/pluginpb
 # gopkg.in/yaml.v2 v2.3.0
 ## explicit
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+## explicit
 gopkg.in/yaml.v3

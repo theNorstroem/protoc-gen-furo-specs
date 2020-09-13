@@ -17,8 +17,10 @@ func Generate(protoAST *protoast.ProtoAST) error {
 
 	for protofilename, descriptor := range protoAST.ProtoMap {
 
+		// generate all the services
 		for ServiceIndex, Service := range descriptor.Service {
 			if shouldGenerateServiceSpec(protoAST, *Service.Name, descriptor, Service) {
+
 				SourceInfo := protoast.GetSourceInfo(descriptor)
 
 				if SourceInfo.Services[ServiceIndex].Info.LeadingComments != nil {
