@@ -1,7 +1,7 @@
 package protoast
 
 import (
-	"github.com/golang/protobuf/protoc-gen-go/descriptor"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 type SourceInfo struct {
@@ -9,16 +9,18 @@ type SourceInfo struct {
 }
 type MessageInfo struct {
 	Name       string
-	Info       *descriptor.SourceCodeInfo_Location
+	Info       *descriptorpb.SourceCodeInfo_Location
 	FieldInfos []FieldInfo
+	Message    descriptorpb.DescriptorProto
 }
 type FieldInfo struct {
-	Name  string
-	Info  *descriptor.SourceCodeInfo_Location
-	Field *descriptor.FieldDescriptorProto
+	Name    string
+	Info    *descriptorpb.SourceCodeInfo_Location
+	Field   *descriptorpb.FieldDescriptorProto
+	Message descriptorpb.DescriptorProto
 }
 
-func GetSourceInfo(descr *descriptor.FileDescriptorProto) SourceInfo {
+func GetSourceInfo(descr *descriptorpb.FileDescriptorProto) SourceInfo {
 	SourceInfo := SourceInfo{}
 
 	for _, location := range descr.GetSourceCodeInfo().GetLocation() {
@@ -29,6 +31,7 @@ func GetSourceInfo(descr *descriptor.FileDescriptorProto) SourceInfo {
 			msgIndex := location.Path[1]
 			SourceInfo.Messages = append(SourceInfo.Messages, MessageInfo{
 				Name:       *descr.MessageType[msgIndex].Name,
+				Message:    *descr.MessageType[msgIndex],
 				Info:       location,
 				FieldInfos: []FieldInfo{},
 			})
@@ -41,11 +44,17 @@ func GetSourceInfo(descr *descriptor.FileDescriptorProto) SourceInfo {
 			msgIndex := location.Path[1]
 			fieldIndex := location.Path[3]
 			fi := FieldInfo{
-				Name:  *descr.MessageType[msgIndex].Field[fieldIndex].Name,
-				Info:  location,
-				Field: descr.MessageType[msgIndex].Field[fieldIndex],
+				Name:    *descr.MessageType[msgIndex].Field[fieldIndex].Name,
+				Info:    location,
+				Field:   descr.MessageType[msgIndex].Field[fieldIndex],
+				Message: *descr.MessageType[msgIndex],
 			}
 			SourceInfo.Messages[msgIndex].FieldInfos = append(SourceInfo.Messages[msgIndex].FieldInfos, fi)
+		}
+
+		if len(location.GetPath()) == 5 && location.Path[0] == 4 && location.Path[2] == 2 {
+			a := location.Path[1]
+			a = a
 		}
 
 	}

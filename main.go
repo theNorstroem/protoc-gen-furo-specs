@@ -14,9 +14,9 @@ func main() {
 	// https://godoc.org/github.com/golang/protobuf/protoc-gen-go/plugin#CodeGeneratorRequest
 	req := &pluginpb.CodeGeneratorRequest{}
 
-	// data, err := ioutil.ReadAll(os.Stdin)
+	data, err := ioutil.ReadAll(os.Stdin)
 	// debug mode
-	data, err := ioutil.ReadFile("protocdata")
+	//data, err := ioutil.ReadFile("protocdata")
 	//ioutil.WriteFile("protocdata",data, 666)
 
 	if err != nil {

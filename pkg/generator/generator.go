@@ -5,6 +5,7 @@ import (
 	"github.com/theNorstroem/protoc-gen-furo-specs/pkg/protoast"
 	"github.com/theNorstroem/spectools/pkg/orderedmap"
 	"github.com/theNorstroem/spectools/pkg/specSpec"
+	"github.com/theNorstroem/spectools/pkg/specSpec/furo"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 	"gopkg.in/yaml.v3"
@@ -24,7 +25,7 @@ func Generate(protoAST *protoast.ProtoAST) error {
 
 				description := ""
 				if SourceInfo.Messages[MessageIndex].Info.LeadingComments != nil {
-					description = *SourceInfo.Messages[MessageIndex].Info.LeadingComments
+					description = cleanDescription(*SourceInfo.Messages[MessageIndex].Info.LeadingComments)
 				}
 
 				typeSpec := specSpec.Type{
@@ -56,26 +57,38 @@ func Generate(protoAST *protoast.ProtoAST) error {
 	return nil
 }
 
-func getFields(fieldinfo protoast.MessageInfo) *orderedmap.OrderedMap {
+func cleanDescription(s string) string {
+	res := s[1 : len(s)-1]
+	strings.Replace(s, "\n", "\\n", -1)
+	return res
+}
+
+func getFields(messageInfo protoast.MessageInfo) *orderedmap.OrderedMap {
 	omap := orderedmap.New()
-	for _, f := range fieldinfo.FieldInfos {
+	for _, f := range messageInfo.FieldInfos {
 
 		fielddescription := ""
 		if f.Info.LeadingComments != nil {
-			fielddescription = *f.Info.LeadingComments
+			fielddescription = cleanDescription(*f.Info.LeadingComments)
 		}
 
 		// repeated is in f.Field.Label
-
+		isRepeated := false
+		if *f.Field.Label == descriptorpb.FieldDescriptorProto_LABEL_REPEATED {
+			isRepeated = true
+		}
 		field := specSpec.Field{
-			Type:        extractTypeFromField(f.Field),
+			Type:        extractTypeFromField(&f),
 			Description: fielddescription,
 			XProto: &specSpec.Fieldproto{
 				Number: *f.Field.Number,
 				Oneof:  "",
 			},
-			XUi:         nil,
-			Meta:        nil,
+			XUi: &specSpec.Fielduiextension{},
+			Meta: &furo.FieldMeta{
+				Repeated: isRepeated,
+				Options:  &furo.Fieldoption{},
+			},
 			Constraints: nil,
 		}
 		omap.Set(f.Name, field)
@@ -84,7 +97,7 @@ func getFields(fieldinfo protoast.MessageInfo) *orderedmap.OrderedMap {
 	return omap
 }
 
-func extractTypeFromField(field *descriptorpb.FieldDescriptorProto) string {
+func extractTypeFromField(fieldinfo *protoast.FieldInfo) string {
 	// If type_name is set, this need not be set.  If both this and type_name
 	// are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
 	// --> Type *FieldDescriptorProto_Type `protobuf:"varint,5,opt,name=type,enum=google.protobuf.FieldDescriptorProto_Type" json:"type,omitempty"`
@@ -97,6 +110,8 @@ func extractTypeFromField(field *descriptorpb.FieldDescriptorProto) string {
 
 	// get primitive types first
 	// vendor/google.golang.org/protobuf/types/descriptorpb/descriptor.pb.go Line 54
+	field := fieldinfo.Field
+
 	if field.Type != nil {
 		t := field.Type.String()
 		if *field.Type != descriptorpb.FieldDescriptorProto_TYPE_MESSAGE &&
@@ -106,12 +121,35 @@ func extractTypeFromField(field *descriptorpb.FieldDescriptorProto) string {
 		}
 		// if we have message, we look in Typename
 		if *field.Type == descriptorpb.FieldDescriptorProto_TYPE_MESSAGE {
-			field.GetJsonName()
-			if *field.TypeName == ".furo.Meta.FieldsEntry" {
-				return "should be a map"
+			// check for nested type map<string,xxx>
+			if fieldinfo.Message.NestedType == nil {
+				// must be type
+				f := *field.TypeName
+				return f[1:len(f)]
+			}
+			for _, nested := range fieldinfo.Message.NestedType {
+				if nested.Options != nil {
+					if *nested.Options.MapEntry {
+						if strings.Title(fieldinfo.Name)+"Entry" == *nested.Name {
+							// this is a map
+							maptype := ""
+							if *nested.Field[1].Type != descriptorpb.FieldDescriptorProto_TYPE_MESSAGE &&
+								*nested.Field[1].Type != descriptorpb.FieldDescriptorProto_TYPE_ENUM &&
+								*nested.Field[1].Type != descriptorpb.FieldDescriptorProto_TYPE_GROUP {
+								maptype = strings.ToLower(t[5:len(t)])
+							} else {
+								m := *nested.Field[1].TypeName
+								maptype = m[1:len(m)]
+							}
+
+							return "map<string," + maptype + ">"
+						}
+					}
+				}
 			}
 
-			return *field.TypeName
+			f := *field.TypeName
+			return f[1:len(f)]
 
 		}
 	}
