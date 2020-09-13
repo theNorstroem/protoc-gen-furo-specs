@@ -17,7 +17,17 @@ func Generate(protoAST *protoast.ProtoAST) error {
 
 	for protofilename, descriptor := range protoAST.ProtoMap {
 
-		// in this example we want to generate a patch.go file for every type in the protos
+		for ServiceIndex, Service := range descriptor.Service {
+			if shouldGenerateServiceSpec(protoAST, *Service.Name, descriptor, Service) {
+				SourceInfo := protoast.GetSourceInfo(descriptor)
+
+				if SourceInfo.Services[ServiceIndex].Info.LeadingComments != nil {
+
+				}
+			}
+		}
+
+		// generate all the messages
 		for MessageIndex, Message := range descriptor.MessageType {
 			if shouldGenerateTypeSpec(protoAST, *Message.Name, descriptor, Message) {
 				SourceInfo := protoast.GetSourceInfo(descriptor)

@@ -11,6 +11,10 @@ import (
 	"strings"
 )
 
+func shouldGenerateServiceSpec(ast *protoast.ProtoAST, s string, descriptor *descriptorpb.FileDescriptorProto, service *descriptorpb.ServiceDescriptorProto) bool {
+	return true
+}
+
 // decide if something should be generated
 // the complete descriptor is given
 func shouldGenerateTypeSpec(protoAST *protoast.ProtoAST, name string, descriptor *descriptorpb.FileDescriptorProto, message *descriptorpb.DescriptorProto) bool {
