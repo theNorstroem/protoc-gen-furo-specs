@@ -72,11 +72,6 @@ func getFields(messageInfo protoast.MessageInfo) *orderedmap.OrderedMap {
 			fielddescription = cleanDescription(*f.Info.LeadingComments)
 		}
 
-		// repeated is in f.Field.Label
-		isRepeated := false
-		if *f.Field.Label == descriptorpb.FieldDescriptorProto_LABEL_REPEATED {
-			isRepeated = true
-		}
 		field := specSpec.Field{
 			Type:        extractTypeFromField(&f),
 			Description: fielddescription,
@@ -86,11 +81,19 @@ func getFields(messageInfo protoast.MessageInfo) *orderedmap.OrderedMap {
 			},
 			XUi: &specSpec.Fielduiextension{},
 			Meta: &furo.FieldMeta{
-				Repeated: isRepeated,
-				Options:  &furo.Fieldoption{},
+				Options: &furo.Fieldoption{},
 			},
 			Constraints: nil,
 		}
+
+		// set repeated, must be false on maps!
+		// repeated is in f.Field.Label
+		isRepeated := false
+		if *f.Field.Label == descriptorpb.FieldDescriptorProto_LABEL_REPEATED {
+			isRepeated = !strings.HasPrefix(field.Type, "map<")
+		}
+		field.Meta.Repeated = isRepeated
+
 		omap.Set(f.Name, field)
 	}
 
