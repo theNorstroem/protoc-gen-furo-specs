@@ -23,13 +23,13 @@ func Generate(protoAST *protoast.ProtoAST) error {
 				SourceInfo := protoast.GetSourceInfo(descriptor)
 				filename, packagename := FileAndPackageNameToGenerate(descriptor, Message)
 
-				description := ""
+				description := packagename + " does not have a description"
 				if SourceInfo.Messages[MessageIndex].Info.LeadingComments != nil {
 					description = cleanDescription(*SourceInfo.Messages[MessageIndex].Info.LeadingComments)
 				}
 
 				typeSpec := specSpec.Type{
-					Name:        packagename,
+					Name:        *Message.Name,
 					Type:        *Message.Name,
 					Description: description,
 					XProto: &specSpec.Typeproto{
