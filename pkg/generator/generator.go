@@ -114,9 +114,9 @@ func extractTypeFromField(fieldinfo *protoast.FieldInfo) string {
 
 	if field.Type != nil {
 		t := field.Type.String()
-		if *field.Type != descriptorpb.FieldDescriptorProto_TYPE_MESSAGE &&
-			*field.Type != descriptorpb.FieldDescriptorProto_TYPE_ENUM &&
-			*field.Type != descriptorpb.FieldDescriptorProto_TYPE_GROUP {
+		if !(*field.Type == descriptorpb.FieldDescriptorProto_TYPE_MESSAGE ||
+			*field.Type == descriptorpb.FieldDescriptorProto_TYPE_ENUM ||
+			*field.Type == descriptorpb.FieldDescriptorProto_TYPE_GROUP) {
 			return strings.ToLower(t[5:len(t)])
 		}
 		// if we have message, we look in Typename
@@ -133,13 +133,19 @@ func extractTypeFromField(fieldinfo *protoast.FieldInfo) string {
 						if strings.Title(fieldinfo.Name)+"Entry" == *nested.Name {
 							// this is a map
 							maptype := ""
-							if *nested.Field[1].Type != descriptorpb.FieldDescriptorProto_TYPE_MESSAGE &&
-								*nested.Field[1].Type != descriptorpb.FieldDescriptorProto_TYPE_ENUM &&
-								*nested.Field[1].Type != descriptorpb.FieldDescriptorProto_TYPE_GROUP {
+							if !(*nested.Field[1].Type == descriptorpb.FieldDescriptorProto_TYPE_MESSAGE ||
+								*nested.Field[1].Type == descriptorpb.FieldDescriptorProto_TYPE_ENUM ||
+								*nested.Field[1].Type == descriptorpb.FieldDescriptorProto_TYPE_GROUP) {
+								t := nested.Field[1].Type.String()
 								maptype = strings.ToLower(t[5:len(t)])
 							} else {
-								m := *nested.Field[1].TypeName
-								maptype = m[1:len(m)]
+								// can be a message or a primitive
+								if *nested.Field[1].Type == descriptorpb.FieldDescriptorProto_TYPE_MESSAGE {
+									// message
+									m := *nested.Field[1].TypeName
+									maptype = m[1:len(m)]
+								}
+
 							}
 
 							return "map<string," + maptype + ">"
