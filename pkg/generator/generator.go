@@ -33,7 +33,7 @@ func Generate(protoAST *protoast.ProtoAST) error {
 					Type:        *Message.Name,
 					Description: description,
 					XProto: &specSpec.Typeproto{
-						Package:    strings.Join(strings.Split(path.Dir(protofilename), "/"), "."), // package is protofilename with . is not the go package
+						Package:    strings.Join(strings.Split(path.Dir(protofilename), "/"), "."), // package is protofilename with . and is not the go package
 						Targetfile: path.Base(protofilename),                                       // is base of packagename
 						Imports:    descriptor.Dependency,
 						Options:    getProtoOptions(descriptor.Options),
@@ -136,7 +136,7 @@ func extractTypeFromField(fieldinfo *protoast.FieldInfo) string {
 					if *nested.Options.MapEntry {
 						if strings.Title(fieldinfo.Name)+"Entry" == *nested.Name {
 							// this is a map
-							maptype := ""
+							maptype := "not_evaluated"
 							if !(*nested.Field[1].Type == descriptorpb.FieldDescriptorProto_TYPE_MESSAGE ||
 								*nested.Field[1].Type == descriptorpb.FieldDescriptorProto_TYPE_ENUM ||
 								*nested.Field[1].Type == descriptorpb.FieldDescriptorProto_TYPE_GROUP) {
@@ -149,9 +149,7 @@ func extractTypeFromField(fieldinfo *protoast.FieldInfo) string {
 									m := *nested.Field[1].TypeName
 									maptype = m[1:len(m)]
 								}
-
 							}
-
 							return "map<string," + maptype + ">"
 						}
 					}
@@ -160,13 +158,13 @@ func extractTypeFromField(fieldinfo *protoast.FieldInfo) string {
 
 			f := *field.TypeName
 			return f[1:len(f)]
-
 		}
 	}
 
 	return "unknown"
 }
 
+// get all known options
 func getProtoOptions(options *descriptorpb.FileOptions) map[string]string {
 	opts := map[string]string{}
 

@@ -8,8 +8,9 @@
 #### [exclude] 
 Optional regex to match target files that should not be built.
 
-If you generate files which have a update_mask but do not need this method you can add a exclude regex which must 
-match to not be generated. 
+Maybe you do not want all request and response types from the services...
+
+`--furo-specs_out=exclude=".*(Response)|(Request).type.spec":. *.proto`
 
 ## Installation
 
