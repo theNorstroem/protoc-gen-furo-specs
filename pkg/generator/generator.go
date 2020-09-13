@@ -82,6 +82,7 @@ func getFields(messageInfo protoast.MessageInfo) *orderedmap.OrderedMap {
 			XUi: &specSpec.Fielduiextension{},
 			Meta: &furo.FieldMeta{
 				Options: &furo.Fieldoption{},
+				Label:   "label." + messageInfo.Name + "." + *f.Field.Name,
 			},
 			Constraints: nil,
 		}
