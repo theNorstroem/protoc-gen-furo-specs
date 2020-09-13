@@ -68,7 +68,7 @@ func getFields(fieldinfo protoast.MessageInfo) *orderedmap.OrderedMap {
 		// repeated is in f.Field.Label
 
 		field := specSpec.Field{
-			Type:        *f.Field.TypeName,
+			Type:        extractTypeFromField(f.Field),
 			Description: fielddescription,
 			XProto: &specSpec.Fieldproto{
 				Number: *f.Field.Number,
@@ -82,6 +82,41 @@ func getFields(fieldinfo protoast.MessageInfo) *orderedmap.OrderedMap {
 	}
 
 	return omap
+}
+
+func extractTypeFromField(field *descriptorpb.FieldDescriptorProto) string {
+	// If type_name is set, this need not be set.  If both this and type_name
+	// are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
+	// --> Type *FieldDescriptorProto_Type `protobuf:"varint,5,opt,name=type,enum=google.protobuf.FieldDescriptorProto_Type" json:"type,omitempty"`
+	// For message and enum types, this is the name of the type.  If the name
+	// starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
+	// rules are used to find the type (i.e. first the nested types within this
+	// message are searched, then within the parent, on up to the root
+	// namespace).
+	// --> TypeName *string `protobuf:"bytes,6,opt,name=type_name,json=typeName" json:"type_name,omitempty"`
+
+	// get primitive types first
+	// vendor/google.golang.org/protobuf/types/descriptorpb/descriptor.pb.go Line 54
+	if field.Type != nil {
+		t := field.Type.String()
+		if *field.Type != descriptorpb.FieldDescriptorProto_TYPE_MESSAGE &&
+			*field.Type != descriptorpb.FieldDescriptorProto_TYPE_ENUM &&
+			*field.Type != descriptorpb.FieldDescriptorProto_TYPE_GROUP {
+			return strings.ToLower(t[5:len(t)])
+		}
+		// if we have message, we look in Typename
+		if *field.Type == descriptorpb.FieldDescriptorProto_TYPE_MESSAGE {
+			field.GetJsonName()
+			if *field.TypeName == ".furo.Meta.FieldsEntry" {
+				return "should be a map"
+			}
+
+			return *field.TypeName
+
+		}
+	}
+
+	return "unknown"
 }
 
 func getProtoOptions(options *descriptorpb.FileOptions) map[string]string {
