@@ -32,13 +32,13 @@ func Generate(protoAST *protoast.ProtoAST) error {
 				}
 
 				serviceSpec := &specSpec.Service{
-					Name:        serviceSpecFileName,
+					Name:        *Service.Name,
 					Version:     "",
 					Description: description,
 					Lifecycle:   nil,
 					XProto: &specSpec.Typeproto{
-						Package:    serviceSpecPackageName,
-						Targetfile: path.Base(serviceSpecFileName),
+						Package:    strings.Join(strings.Split(path.Dir(protofilename), "/"), "."),
+						Targetfile: path.Base(protofilename),
 						Imports:    descriptor.Dependency,
 						Options:    getProtoOptions(descriptor.Options),
 					},

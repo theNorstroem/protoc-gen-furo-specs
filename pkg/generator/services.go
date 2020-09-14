@@ -49,11 +49,11 @@ func getServices(serviceInfo protoast.ServiceInfo, sourceInfo protoast.SourceInf
 				Method:      verb,
 				Rel:         rel,
 			},
-			Query:   nil, // fill from request type
+			Query:   nil, // fill from request type for compatibility reason
 			RpcName: *methodInfo.Method.Name,
 		}
 
-		omap.Set(methodInfo.Name, method)
+		omap.Set(strings.Replace(methodInfo.Name, *methodInfo.Service.Name, "", 1), method)
 	}
 
 	return omap

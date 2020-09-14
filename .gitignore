@@ -1,6 +1,7 @@
 # from testing
 in
 out
+out_out
 protoc-gen-furo-specs
 protocdata
 
