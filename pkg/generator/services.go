@@ -19,7 +19,9 @@ func getServices(serviceInfo protoast.ServiceInfo, sourceInfo protoast.SourceInf
 		deeplinkDescription := ""
 
 		if methodInfo.HttpRule.Info.LeadingComments != nil {
-			deeplinkDescription = cleanDescription(*methodInfo.HttpRule.Info.LeadingComments)
+			deeplinkDescription = (*methodInfo.HttpRule.Info.LeadingComments)
+			//deeplinkDescription = strings.Replace(deeplinkDescription, "\n", "\\n", -1)
+
 		}
 		// extract api options to href method and rel
 
