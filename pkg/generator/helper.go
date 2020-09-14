@@ -48,6 +48,7 @@ func shouldGenerateTypeSpec(protoAST *protoast.ProtoAST, name string, descriptor
 
 }
 
+// Gives the filename for the type according to the messages
 func FileAndPackageNameToGenerate(descriptor *descriptorpb.FileDescriptorProto, message *descriptorpb.DescriptorProto) (filename string, packagename string) {
 	name := *message.Name
 	p := strings.Split(*descriptor.Options.GoPackage, ";")
@@ -55,4 +56,18 @@ func FileAndPackageNameToGenerate(descriptor *descriptorpb.FileDescriptorProto, 
 
 	filename = path.Join(path.Dir(*descriptor.Name), name+".type.spec")
 	return filename, pkg
+}
+
+// Gives the file name for the spec according to the service protos
+func evaluateServiceSpecFileName(service *descriptorpb.ServiceDescriptorProto, descriptor *descriptorpb.FileDescriptorProto) (filename string) {
+	name := *service.Name
+	filename = path.Join(path.Dir(*descriptor.Name), name+".service.spec")
+	return filename
+}
+
+// Gives the package name for the spec according to the service protos
+func evaluateServiceSpecPackageName(service *descriptorpb.ServiceDescriptorProto, descriptor *descriptorpb.FileDescriptorProto) (filename string) {
+	p := strings.Split(*descriptor.Options.GoPackage, ";")
+	pkg := p[len(p)-1]
+	return pkg
 }

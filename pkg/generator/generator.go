@@ -22,10 +22,33 @@ func Generate(protoAST *protoast.ProtoAST) error {
 			if shouldGenerateServiceSpec(protoAST, *Service.Name, descriptor, Service) {
 
 				SourceInfo := protoast.GetSourceInfo(descriptor)
+				serviceSpecFileName := evaluateServiceSpecFileName(Service, descriptor)
+				serviceSpecPackageName := evaluateServiceSpecPackageName(Service, descriptor)
+
+				description := serviceSpecPackageName + " does not have a description"
 
 				if SourceInfo.Services[ServiceIndex].Info.LeadingComments != nil {
-
+					description = cleanDescription(*SourceInfo.Services[ServiceIndex].Info.LeadingComments)
 				}
+
+				serviceSpec := &specSpec.Service{
+					Name:        serviceSpecFileName,
+					Version:     "",
+					Description: description,
+					Lifecycle:   nil,
+					XProto:      nil,
+					Services:    nil,
+				}
+
+				// append the response
+				var responseFile pluginpb.CodeGeneratorResponse_File
+				responseFile.Name = &serviceSpecFileName
+
+				content, _ := yaml.Marshal(serviceSpec)
+				s := string(content)
+				responseFile.Content = &s
+
+				protoAST.Response.File = append(protoAST.Response.File, &responseFile)
 			}
 		}
 
