@@ -2,5 +2,6 @@
 in
 out
 protoc-gen-furo-specs
+protocdata
 
 .idea

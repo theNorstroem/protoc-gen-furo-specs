@@ -36,8 +36,13 @@ func Generate(protoAST *protoast.ProtoAST) error {
 					Version:     "",
 					Description: description,
 					Lifecycle:   nil,
-					XProto:      nil,
-					Services:    nil,
+					XProto: &specSpec.Typeproto{
+						Package:    serviceSpecPackageName,
+						Targetfile: path.Base(serviceSpecFileName),
+						Imports:    descriptor.Dependency,
+						Options:    getProtoOptions(descriptor.Options),
+					},
+					Services: getServices(SourceInfo.Services[ServiceIndex]),
 				}
 
 				// append the response

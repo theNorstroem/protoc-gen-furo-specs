@@ -18,10 +18,15 @@ type ServiceInfo struct {
 }
 
 type MethodInfo struct {
-	Name       string
+	Name     string
+	Info     *descriptorpb.SourceCodeInfo_Location
+	Method   *descriptorpb.MethodDescriptorProto
+	Service  *descriptorpb.ServiceDescriptorProto // link the parent service
+	HttpRule *ApiOptionInfo
+}
+
+type ApiOptionInfo struct {
 	Info       *descriptorpb.SourceCodeInfo_Location
-	Method     *descriptorpb.MethodDescriptorProto
-	Service    *descriptorpb.ServiceDescriptorProto // link the parent service
 	ApiOptions *options.HttpRule
 }
 
@@ -63,21 +68,23 @@ func GetSourceInfo(descr *descriptorpb.FileDescriptorProto) SourceInfo {
 			methodIndex := location.Path[3]
 			apiOptions, _ := ExtractAPIOptions(descr.Service[sIndex].Method[methodIndex])
 			fi := MethodInfo{
-				Name:       *descr.Service[sIndex].Method[methodIndex].Name,
-				Info:       location,
-				Method:     descr.Service[sIndex].Method[methodIndex],
-				Service:    descr.Service[sIndex],
-				ApiOptions: apiOptions,
+				Name:    *descr.Service[sIndex].Method[methodIndex].Name,
+				Info:    location,
+				Method:  descr.Service[sIndex].Method[methodIndex],
+				Service: descr.Service[sIndex],
+				HttpRule: &ApiOptionInfo{
+					Info:       nil,
+					ApiOptions: apiOptions,
+				},
 			}
 			SourceInfo.Services[sIndex].Methods = append(SourceInfo.Services[sIndex].Methods, fi)
 		}
 
 		// Method options
 		if len(location.GetPath()) == 6 && location.Path[0] == 6 && location.Path[2] == 2 && location.Path[4] == 4 {
-			//sIndex := location.Path[1]
-			//mIndex := location.Path[3]
-			a := 2
-			a = a
+			sIndex := location.Path[1]
+			methodIndex := location.Path[3]
+			SourceInfo.Services[sIndex].Methods[methodIndex].HttpRule.Info = location
 		}
 
 		// 4 111 2 222 => 4 MessageIndex 2 FieldIndex
@@ -106,11 +113,6 @@ func GetSourceInfo(descr *descriptorpb.FileDescriptorProto) SourceInfo {
 				Message: *descr.MessageType[msgIndex],
 			}
 			SourceInfo.Messages[msgIndex].FieldInfos = append(SourceInfo.Messages[msgIndex].FieldInfos, fi)
-		}
-
-		if len(location.GetPath()) == 5 && location.Path[0] == 4 && location.Path[2] == 2 {
-			a := location.Path[1]
-			a = a
 		}
 
 	}
