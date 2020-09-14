@@ -22,7 +22,7 @@ github.com/iancoleman/strcase
 ## explicit
 # github.com/mitchellh/copystructure v1.0.0
 ## explicit
-# github.com/theNorstroem/spectools v1.3.0
+# github.com/theNorstroem/spectools v1.4.0
 ## explicit
 github.com/theNorstroem/spectools/pkg/orderedmap
 github.com/theNorstroem/spectools/pkg/specSpec

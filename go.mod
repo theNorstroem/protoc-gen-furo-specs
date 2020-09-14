@@ -13,7 +13,7 @@ require (
 	github.com/iancoleman/strcase v0.1.1
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
-	github.com/theNorstroem/spectools v1.3.0
+	github.com/theNorstroem/spectools v1.4.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
 	google.golang.org/protobuf v1.25.0
