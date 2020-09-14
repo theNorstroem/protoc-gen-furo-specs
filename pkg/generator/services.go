@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func getServices(info protoast.ServiceInfo) *orderedmap.OrderedMap {
+func getServices(serviceInfo protoast.ServiceInfo, sourceInfo protoast.SourceInfo) *orderedmap.OrderedMap {
 	omap := orderedmap.New()
-	for _, methodInfo := range info.Methods {
+	for _, methodInfo := range serviceInfo.Methods {
 
 		rpcMethodDescription := ""
 		if methodInfo.Info.LeadingComments != nil {
@@ -25,13 +25,21 @@ func getServices(info protoast.ServiceInfo) *orderedmap.OrderedMap {
 
 		// *methodInfo.HttpRule.ApiOptions.Pattern is oneof
 		// details: vendor/google.golang.org/genproto/googleapis/api/annotations/http.pb.go:400
-		href, verb, rel := extractApiOptionPattern(methodInfo.HttpRule)
+		href, verb, rel, databody := extractApiOptionPattern(methodInfo.HttpRule)
+
+		// request type
+		req := *methodInfo.Method.InputType
+		inputType := req[1:len(req)]
+		// response type
+		res := *methodInfo.Method.OutputType
+		outputType := res[1:len(res)]
 
 		method := specSpec.Rpc{
 			Description: rpcMethodDescription,
 			Data: &specSpec.Servicereqres{
-				Request:  *methodInfo.Method.InputType,
-				Response: *methodInfo.Method.OutputType,
+				Request:   inputType,
+				Response:  outputType,
+				BodyField: databody,
 			},
 			Deeplink: &specSpec.Servicedeeplink{
 				Description: deeplinkDescription,
@@ -39,7 +47,7 @@ func getServices(info protoast.ServiceInfo) *orderedmap.OrderedMap {
 				Method:      verb,
 				Rel:         rel,
 			},
-			Query:   nil,
+			Query:   nil, // fill from request type
 			RpcName: *methodInfo.Method.Name,
 		}
 
@@ -50,12 +58,13 @@ func getServices(info protoast.ServiceInfo) *orderedmap.OrderedMap {
 }
 
 // get the href, method, rel
-func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method string, rel string) {
+func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method string, rel string, body string) {
 
 	pattern := info.ApiOptions.Pattern
 	href = "/no/option/given"
 	method = "GET"
 	rel = "self"
+	body = info.ApiOptions.Body
 
 	if info.Info != nil {
 		// try first line of comment for the rel
@@ -71,7 +80,7 @@ func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method 
 	if isGet {
 		href = get.Get
 		method = "GET"
-		return href, method, rel
+		return href, method, rel, body
 	}
 
 	post, isPost := pattern.(*options.HttpRule_Post)
@@ -79,7 +88,7 @@ func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method 
 		href = post.Post
 		method = "POST"
 		rel = checkForFallbackRel(rel, method)
-		return href, method, rel
+		return href, method, rel, body
 	}
 
 	patch, isPatch := pattern.(*options.HttpRule_Patch)
@@ -87,7 +96,7 @@ func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method 
 		href = patch.Patch
 		method = "PATCH"
 		rel = checkForFallbackRel(rel, method)
-		return href, method, rel
+		return href, method, rel, body
 	}
 
 	put, isPut := pattern.(*options.HttpRule_Put)
@@ -95,7 +104,7 @@ func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method 
 		href = put.Put
 		method = "PUT"
 		rel = checkForFallbackRel(rel, method)
-		return href, method, rel
+		return href, method, rel, body
 	}
 
 	delete, isDelete := pattern.(*options.HttpRule_Delete)
@@ -103,7 +112,7 @@ func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method 
 		href = delete.Delete
 		method = "DELETE"
 		rel = checkForFallbackRel(rel, method)
-		return href, method, rel
+		return href, method, rel, body
 	}
 
 	// custom is for the verb and not for the custom method...
@@ -112,10 +121,10 @@ func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method 
 		href = custom.Custom.Path
 		method = custom.Custom.Kind
 		rel = checkForFallbackRel(rel, method)
-		return href, method, rel
+		return href, method, rel, body
 	}
 
-	return href, method, rel
+	return href, method, rel, body
 }
 
 func checkForFallbackRel(rel string, method string) string {

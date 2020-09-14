@@ -2,7 +2,9 @@
 
 
 ## Use Case
-
+- If you have a bunch of services and messages specified in proto and want to use them in a furo client project,
+this generator comes very handy.
+  
 
 ## Parameters
 #### [exclude] 
@@ -18,7 +20,7 @@ Maybe you do not want all request and response types from the services...
 go get github.com/theNorstroem/protoc-gen-furo-specs
 ```
 
-Add protoc-gen-furo-specs to your tools.go file.
+Add protoc-gen-furo-specs to your tools.go file if you want.
 
 ```go
 //+build tools

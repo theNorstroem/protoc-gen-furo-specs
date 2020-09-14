@@ -42,7 +42,7 @@ func Generate(protoAST *protoast.ProtoAST) error {
 						Imports:    descriptor.Dependency,
 						Options:    getProtoOptions(descriptor.Options),
 					},
-					Services: getServices(SourceInfo.Services[ServiceIndex]),
+					Services: getServices(SourceInfo.Services[ServiceIndex], SourceInfo),
 				}
 
 				// append the response
