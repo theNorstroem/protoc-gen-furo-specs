@@ -4,13 +4,12 @@
 ## explicit
 # github.com/Masterminds/sprig v2.22.0+incompatible
 ## explicit
+# github.com/eclipse/eclipsefuro v1.31.0
+## explicit
+github.com/eclipse/eclipsefuro/furo/pkg/orderedmap
+github.com/eclipse/eclipsefuro/furo/pkg/specSpec
 # github.com/gogo/protobuf v1.3.1
 ## explicit
-# github.com/golang/protobuf v1.4.2
-## explicit
-github.com/golang/protobuf/proto
-github.com/golang/protobuf/protoc-gen-go/descriptor
-github.com/golang/protobuf/ptypes/any
 # github.com/google/uuid v1.1.2
 ## explicit
 # github.com/huandu/xstrings v1.3.2
@@ -22,17 +21,16 @@ github.com/iancoleman/strcase
 ## explicit
 # github.com/mitchellh/copystructure v1.0.0
 ## explicit
-# github.com/theNorstroem/spectools v1.4.0
-## explicit
-github.com/theNorstroem/spectools/pkg/orderedmap
-github.com/theNorstroem/spectools/pkg/specSpec
-github.com/theNorstroem/spectools/pkg/specSpec/furo
 # golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 ## explicit
-# google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
+# google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
 ## explicit
 google.golang.org/genproto/googleapis/api/annotations
-# google.golang.org/protobuf v1.25.0
+# google.golang.org/grpc v1.40.0
+## explicit
+# google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.0
+## explicit
+# google.golang.org/protobuf v1.27.1
 ## explicit
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
@@ -44,13 +42,12 @@ google.golang.org/protobuf/internal/encoding/messageset
 google.golang.org/protobuf/internal/encoding/tag
 google.golang.org/protobuf/internal/encoding/text
 google.golang.org/protobuf/internal/errors
-google.golang.org/protobuf/internal/fieldsort
 google.golang.org/protobuf/internal/filedesc
 google.golang.org/protobuf/internal/filetype
 google.golang.org/protobuf/internal/flags
 google.golang.org/protobuf/internal/genid
 google.golang.org/protobuf/internal/impl
-google.golang.org/protobuf/internal/mapsort
+google.golang.org/protobuf/internal/order
 google.golang.org/protobuf/internal/pragma
 google.golang.org/protobuf/internal/set
 google.golang.org/protobuf/internal/strs

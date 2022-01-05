@@ -1,9 +1,9 @@
 package generator
 
 import (
+	"github.com/eclipse/eclipsefuro/furo/pkg/orderedmap"
+	"github.com/eclipse/eclipsefuro/furo/pkg/specSpec"
 	"github.com/theNorstroem/protoc-gen-furo-specs/pkg/protoast"
-	"github.com/theNorstroem/spectools/pkg/orderedmap"
-	"github.com/theNorstroem/spectools/pkg/specSpec"
 	options "google.golang.org/genproto/googleapis/api/annotations"
 	"strings"
 )
@@ -18,7 +18,7 @@ func getServices(serviceInfo protoast.ServiceInfo, sourceInfo protoast.SourceInf
 		}
 		deeplinkDescription := ""
 
-		if methodInfo.HttpRule.Info.LeadingComments != nil {
+		if methodInfo.HttpRule.Info != nil && methodInfo.HttpRule.Info.LeadingComments != nil {
 			deeplinkDescription = (*methodInfo.HttpRule.Info.LeadingComments)
 			//deeplinkDescription = strings.Replace(deeplinkDescription, "\n", "\\n", -1)
 
@@ -27,33 +27,56 @@ func getServices(serviceInfo protoast.ServiceInfo, sourceInfo protoast.SourceInf
 
 		// *methodInfo.HttpRule.ApiOptions.Pattern is oneof
 		// details: vendor/google.golang.org/genproto/googleapis/api/annotations/http.pb.go:400
-		href, verb, rel, databody := extractApiOptionPattern(methodInfo.HttpRule)
 
-		// request type
-		req := *methodInfo.Method.InputType
-		inputType := req[1:len(req)]
-		// response type
-		res := *methodInfo.Method.OutputType
-		outputType := res[1:len(res)]
+		if methodInfo.HttpRule.ApiOptions != nil {
+			href, verb, rel, databody := extractApiOptionPattern(methodInfo.HttpRule)
+			// request type
+			req := *methodInfo.Method.InputType
+			inputType := req[1:len(req)]
+			// response type
+			res := *methodInfo.Method.OutputType
+			outputType := res[1:len(res)]
 
-		method := specSpec.Rpc{
-			Description: rpcMethodDescription,
-			Data: &specSpec.Servicereqres{
-				Request:   inputType,
-				Response:  outputType,
-				BodyField: databody,
-			},
-			Deeplink: &specSpec.Servicedeeplink{
-				Description: deeplinkDescription,
-				Href:        href,
-				Method:      verb,
-				Rel:         rel,
-			},
-			Query:   nil, // fill from request type for compatibility reason
-			RpcName: *methodInfo.Method.Name,
+			method := specSpec.Rpc{
+				Description: rpcMethodDescription,
+				Data: &specSpec.Servicereqres{
+					Request:   inputType,
+					Response:  outputType,
+					Bodyfield: databody,
+				},
+				Deeplink: &specSpec.Servicedeeplink{
+					Description: deeplinkDescription,
+					Href:        href,
+					Method:      verb,
+					Rel:         rel,
+				},
+				Query:   nil, // fill from request type for compatibility reason
+				RpcName: *methodInfo.Method.Name,
+			}
+
+			omap.Set(strings.Replace(methodInfo.Name, *methodInfo.Service.Name, "", 1), method)
+		} else {
+			// Pure GRPC service
+			// request type
+			req := *methodInfo.Method.InputType
+			inputType := req[1:len(req)]
+			// response type
+			res := *methodInfo.Method.OutputType
+			outputType := res[1:len(res)]
+
+			method := specSpec.Rpc{
+				Description: rpcMethodDescription,
+				Data: &specSpec.Servicereqres{
+					Request:  inputType,
+					Response: outputType,
+				},
+				Deeplink: &specSpec.Servicedeeplink{},
+				Query:    nil, // fill from request type for compatibility reason
+				RpcName:  *methodInfo.Method.Name,
+			}
+
+			omap.Set(strings.Replace(methodInfo.Name, *methodInfo.Service.Name, "", 1), method)
 		}
-
-		omap.Set(strings.Replace(methodInfo.Name, *methodInfo.Service.Name, "", 1), method)
 	}
 
 	return omap
@@ -72,10 +95,13 @@ func extractApiOptionPattern(info *protoast.ApiOptionInfo) (href string, method 
 		// try first line of comment for the rel
 		//   Delete: DELETE /samples/{xxx} google.protobuf.Empty, google.protobuf.Empty #Use this to delete existing samples.
 		// becomes delete
-		c := strings.Split(*info.Info.LeadingComments, ":")
-		if len(c) > 0 && len(strings.TrimSpace(c[0])) > 3 {
-			rel = strings.ToLower(strings.TrimSpace(c[0]))
+		if info.Info.LeadingComments != nil {
+			c := strings.Split(*info.Info.LeadingComments, ":")
+			if len(c) > 0 && len(strings.TrimSpace(c[0])) > 3 {
+				rel = strings.ToLower(strings.TrimSpace(c[0]))
+			}
 		}
+
 	}
 
 	get, isGet := pattern.(*options.HttpRule_Get)

@@ -1,11 +1,10 @@
 package generator
 
 import (
+	"github.com/eclipse/eclipsefuro/furo/pkg/orderedmap"
+	"github.com/eclipse/eclipsefuro/furo/pkg/specSpec"
 	"github.com/iancoleman/strcase"
 	"github.com/theNorstroem/protoc-gen-furo-specs/pkg/protoast"
-	"github.com/theNorstroem/spectools/pkg/orderedmap"
-	"github.com/theNorstroem/spectools/pkg/specSpec"
-	"github.com/theNorstroem/spectools/pkg/specSpec/furo"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
 	"gopkg.in/yaml.v3"
@@ -119,9 +118,8 @@ func getFields(messageInfo protoast.MessageInfo) *orderedmap.OrderedMap {
 				Number: *f.Field.Number,
 				Oneof:  "",
 			},
-			XUi: &specSpec.Fielduiextension{},
-			Meta: &furo.FieldMeta{
-				Options: &furo.Fieldoption{},
+			Meta: &specSpec.FieldMeta{
+				Options: &specSpec.Fieldoption{},
 				Label:   "label." + messageInfo.Name + "." + *f.Field.Name,
 			},
 			Constraints: nil,
@@ -153,7 +151,7 @@ func extractTypeFromField(fieldinfo *protoast.FieldInfo) string {
 	// --> TypeName *string `protobuf:"bytes,6,opt,name=type_name,json=typeName" json:"type_name,omitempty"`
 
 	// get primitive types first
-	// vendor/google.golang.org/protobuf/types/descriptorpb/descriptor.pb.go Line 54
+	// vendor/google.golang.org/protobuf/types/specSpec/descriptor.pb.go Line 54
 	field := fieldinfo.Field
 
 	if field.Type != nil {
