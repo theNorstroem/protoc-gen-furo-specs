@@ -1,3 +1,5 @@
+> MOVED TO https://github.com/eclipse/eclipsefuro
+
 # protoc-gen-furo-specs
 
 
